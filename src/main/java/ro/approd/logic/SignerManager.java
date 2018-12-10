@@ -8,7 +8,7 @@ import java.security.GeneralSecurityException;
 
 public class SignerManager {
 
-    private static final String SIGNED = "/signed";
+    private static final String SIGNED = File.separator + "signed";
     private static final String PDF = ".pdf";
     private DocumentSigner documentSigner;
 

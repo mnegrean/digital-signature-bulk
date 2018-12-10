@@ -18,6 +18,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.Certificate;
 
@@ -35,19 +37,29 @@ public class DocumentSigner {
         this.contact = contact;
     }
 
-    public void sign(File src) throws IOException, DocumentException, GeneralSecurityException {
+    public void sign(File fileToBeSigned) throws IOException, DocumentException, GeneralSecurityException {
         String initialRootPath = rootPath.replaceAll("signed", "");
 
-        String absolutePath = src.getAbsolutePath();
-        absolutePath = absolutePath.replaceAll(initialRootPath, "");
-        absolutePath = initialRootPath + "signed/" + absolutePath;
+        System.out.println("Initial root path: " + initialRootPath);
 
-        File dest = new File(absolutePath);
-        File parent = dest.getParentFile();
+        String absolutePath = fileToBeSigned.getAbsolutePath();
+        System.out.println("Absolute path: " + absolutePath);
+
+        Path pathBase = Paths.get(initialRootPath);
+        Path absolute = Paths.get(absolutePath);
+        Path relativize = pathBase.relativize(absolute);
+
+        String destinationFileAbsolutePath = initialRootPath + "signed" + File.separator + relativize;
+
+        File destinationFileSigned = new File(destinationFileAbsolutePath);
+        File parent = destinationFileSigned.getParentFile();
         if (!parent.exists() && !parent.mkdirs()) {
             throw new IllegalStateException("Couldn't create dir: " + parent);
         }
-        dest.createNewFile();
+        boolean created = destinationFileSigned.createNewFile();
+        if (!created) {
+            throw new IllegalStateException("Couldn't create file: " + destinationFileAbsolutePath);
+        }
 
         Provider providerPKCS11 = buildProviderConfig();
 
@@ -60,8 +72,8 @@ public class DocumentSigner {
         PrivateKey pk = (PrivateKey) ks.getKey(alias, pass);
         Certificate[] chain = ks.getCertificateChain(alias);
 
-        PdfReader reader = new PdfReader(src.getAbsolutePath());
-        FileOutputStream os = new FileOutputStream(dest);
+        PdfReader reader = new PdfReader(fileToBeSigned.getAbsolutePath());
+        FileOutputStream os = new FileOutputStream(destinationFileSigned);
         PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0');
 
         PdfSignatureAppearance appearance = createSignatureAppearance(stamper);

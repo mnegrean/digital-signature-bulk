@@ -101,8 +101,10 @@ public class MainView extends JFrame implements ActionListener {
         }
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == selectFolder || e.getSource() == selecteazaButton) {
+    public void actionPerformed(ActionEvent actionEvent) {
+        Object source = actionEvent.getSource();
+
+        if (source == selectFolder || source == selecteazaButton) {
             directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = directoryChooser.showOpenDialog(MainView.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -110,22 +112,23 @@ public class MainView extends JFrame implements ActionListener {
                 this.signDirectory = directoryChooser.getSelectedFile();
             }
         }
-        if (e.getSource() == selectExecutable) {
+
+        if (source == selectExecutable) {
             int returnVal = fileChooser.showOpenDialog(MainView.this);
             selectExecutable(returnVal);
         }
-        if (e.getSource() == semneazaButton) {
+
+        if (source == semneazaButton) {
 
             if (StringUtils.isNotEmpty(inputField.getText())) {
                 signDirectory = new File(inputField.getText());
             }
-            if (executable != null && signDirectory != null && pass != null && contact != null) {
+            if (executable != null && signDirectory != null && StringUtils.isNotEmpty(pass) && StringUtils.isNotEmpty(contact)) {
                 try {
                     signerManager.signDocuments(signDirectory, executable, pass, contact);
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                } finally {
                     JOptionPane.showMessageDialog(panel, "S-a semnat cu succes.");
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -145,14 +148,14 @@ public class MainView extends JFrame implements ActionListener {
                 }
             }
 
-            if (pass == null) {
+            if (StringUtils.isEmpty(pass)) {
                 String password = JOptionPane.showInputDialog(panel, "Introduceți parola semnăturii digitale.");
                 if (password != null && !password.isEmpty()) {
                     this.pass = password;
                 }
             }
 
-            if (contact == null) {
+            if (StringUtils.isEmpty(contact)) {
                 String contact = JOptionPane.showInputDialog(panel, "Introduceți numele și prenumele deținătorului semnăturii.");
                 if (contact != null && !contact.isEmpty()) {
                     this.contact = contact;
@@ -175,8 +178,8 @@ public class MainView extends JFrame implements ActionListener {
         }
         try {
             properties.store(new FileOutputStream(CONFIG_TXT), null);
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
