@@ -1,9 +1,12 @@
 package ro.approd.logic;
 
 import com.itextpdf.text.DocumentException;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 
 public class SignerManager {
@@ -14,10 +17,17 @@ public class SignerManager {
 
     public void signDocuments(File signDirectory, File executable, String pass, String contact) throws IOException {
         String rootPath = signDirectory.getAbsolutePath() + SIGNED;
+        deleteBaseFolderIfExists(rootPath);
         String execPath = executable.getAbsolutePath();
         this.documentSigner = new DocumentSigner(rootPath, execPath, pass, contact);
 
         signAndRecreate(signDirectory);
+    }
+
+    private void deleteBaseFolderIfExists(String rootPath) throws IOException {
+        if (Files.exists(Paths.get(rootPath))) {
+            FileUtils.deleteDirectory(new File(rootPath));
+        }
     }
 
     private void signAndRecreate(File file) throws IOException {

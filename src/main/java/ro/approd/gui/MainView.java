@@ -12,13 +12,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static ro.approd.util.Constants.*;
+
 public class MainView extends JFrame implements ActionListener {
 
-    private static final String CONFIG_TXT = "config.properties";
-    private static final String EXE = "exe";
-    private static final String SIGN = "sign";
-    private static final String PASS = "pass";
-    private static final String CONTACT = "contact";
     private JPanel panel = new JPanel();
 
     private JMenuItem selectExecutable = new JMenuItem("Selectează executabilul");
